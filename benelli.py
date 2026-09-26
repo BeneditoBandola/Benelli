@@ -56,7 +56,7 @@ TABELA_TECIDOS = {
 # Cabeçalho
 st.title("👕 Benelli Confecções")
 st.markdown("##### *Sistema Profissional de Orçamentos e Consulta de Medidas*")
-st.info("📞 **Contato direto:** (35) 98846-6651 | *Confeccionamos peças sob medida, consulte-nos.*[cite: 11, 13]")
+st.info("📞 **Contato direto:** (35) 98846-6651 | *Confeccionamos peças sob medida, consulte-nos.*")
 
 st.divider()
 
@@ -76,16 +76,15 @@ with aba_cliente:
 
     if escolha_tabela == "Camisetas Adultas":
         st.subheader("👕 Tabela de Camisetas Adultas")
-        # Exibe a imagem diretamente na tela
-        st.image("adultas.png", caption="Esquema de Medidas - Camisetas Adultas", use_column_width=True)
+        st.image("tamanhos camisetas.png", caption="Esquema de Medidas - Camisetas Adultas", use_container_width=True)
 
     elif escolha_tabela == "Tamanhos Infantis":
         st.subheader("🧒 Tabela de Tamanhos Infantis")
-        st.image("infantis.png", caption="Esquema de Medidas - Infantil", use_column_width=True)
+        st.image("tamanhos infantil.png", caption="Esquema de Medidas - Infantil", use_container_width=True)
 
     elif escolha_tabela == "Tamanhos Baby Look":
         st.subheader("👚 Tabela de Baby Look")
-        st.image("babylook.png", caption="Esquema de Medidas - Baby Look", use_column_width=True)
+        st.image("baby look.png", caption="Esquema de Medidas - Baby Look", use_container_width=True)
 
 with aba_orcamento:
     st.header("Gerador de Orçamentos e Cotações")
@@ -132,7 +131,7 @@ with aba_orcamento:
             f"• *Condição:* {condicao_pagamento}\n"
             f"• *Valor Unitário:* R$ {preco_unitario:.2f}\n"
             f"• *Valor Total:* *R$ {valor_total:.2f}*\n\n"
-            f"Ficamos à disposição! Entre em contato pelo telefone (35) 98846-6651[cite: 11, 13]."
+            f"Ficamos à disposição! Entre em contato pelo telefone (35) 98846-6651."
         )
         st.success("Texto gerado com sucesso! Copie abaixo:")
         st.text_area("Mensagem pronta para envio:", texto_wpp, height=160)
