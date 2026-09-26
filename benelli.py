@@ -43,6 +43,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+# Função auxiliar para formatar valores no padrão brasileiro (R$ 0,00)
+def formata_real(valor):
+  return (
+      f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+  )
+
+
 # Tabela de preços oficial e Guia de Tecidos
 TABELA_TECIDOS = {
     "Meia Malha Cardada - Branca": {
@@ -74,13 +82,18 @@ TABELA_TECIDOS = {
             " fibras curtas. O resultado é um tecido mais limpo, macio e com"
             " maior durabilidade."
         ),
-        "beneficios": "Toque superior, não forma pilling facilmente, excelente acabamento.",
+        "beneficios": (
+            "Toque superior, não forma pilling facilmente, excelente"
+            " acabamento."
+        ),
         "indicacao": "Moda urbana, marcas próprias e camisetas de alto padrão.",
     },
     "Meia Malha Penteada - Clara": {
         "avista": 51.84,
         "prazo": 52.90,
-        "desc": "Algodão penteado em tons claros. Toque suave e excelente absorção.",
+        "desc": (
+            "Algodão penteado em tons claros. Toque suave e excelente absorção."
+        ),
         "beneficios": "Conforto térmico elevado e toque aveludado.",
         "indicacao": "Linha casual e vestuário diário refinado.",
     },
@@ -122,7 +135,10 @@ TABELA_TECIDOS = {
             "Tecido tecnológico desenvolvido para facilitar a evaporação do"
             " suor."
         ),
-        "beneficios": "Excelente respirabilidade e conforto térmico durante exercícios.",
+        "beneficios": (
+            "Excelente respirabilidade e conforto térmico durante"
+            " exercícios."
+        ),
         "indicacao": "Uniformes esportivos, academias e corridas.",
     },
     "Meia Malha Dry Fit / Dry Sport - Escura": {
@@ -130,7 +146,7 @@ TABELA_TECIDOS = {
         "prazo": 42.50,
         "desc": "Malha Dry Fit em tons escuros com excelente caimento esportivo.",
         "beneficios": "Leveza, absorção de suor e toque gelado.",
-        "indicacao": "Camisas de equipas de futebol e vestuário fitness.",
+        "indicacao": "Camisas de equipes de futebol e vestuário fitness.",
     },
     "Moletom Flanelado Cores": {
         "avista": 52.43,
@@ -146,10 +162,12 @@ TABELA_TECIDOS = {
         "avista": 53.80,
         "prazo": 54.90,
         "desc": (
-            "Malha encorpada com toque semelhança à pele, muito usada na"
-            " linha infantil e de alta qualidade."
+            "Malha encorpada com toque semelhante à pele, muito usada na linha"
+            " infantil e de alta qualidade."
         ),
-        "beneficios": "Extremamente macio, seguro para peles sensíveis e estruturado.",
+        "beneficios": (
+            "Extremamente macio, seguro para peles sensíveis e estruturado."
+        ),
         "indicacao": "Moda infantil e peças de inverno leve.",
     },
 }
@@ -233,8 +251,8 @@ with aba_tecidos:
       st.write(f"✨ **Benefícios:** {info['beneficios']}")
       st.write(f"🎯 **Ideal para:** {info['indicacao']}")
       st.write(
-          f"💰 **Preço (À Vista):** R$ {info['avista']:.2f} | **A Prazo:** R$"
-          f" {info['prazo']:.2f}"
+          f"💰 **Preço (À Vista):** {formata_real(info['avista'])} | **A"
+          f" Prazo:** {formata_real(info['prazo'])}"
       )
 
 with aba_orcamento:
@@ -297,9 +315,9 @@ with aba_orcamento:
   st.subheader("Resumo da Cotação")
 
   m1, m2, m3 = st.columns(3)
-  m1.metric("Preço Unitário", f"R$ {preco_unitario:.2f}")
+  m1.metric("Preço Unitário", formata_real(preco_unitario))
   m2.metric("Qtd. Total", f"{quantidade_total} un.")
-  m3.metric("Valor Total", f"R$ {valor_total:.2f}")
+  m3.metric("Valor Total", formata_real(valor_total))
 
   st.write(f"**Cliente:** {cliente_nome if cliente_nome else 'Cliente Geral'}")
   st.write(f"**Tecido Selecionado:** {tecido_escolhido}")
@@ -313,7 +331,8 @@ with aba_orcamento:
 
   st.markdown("---")
 
-  # Função para gerar o PDF formatado com ReportLab
+
+  # Função para gerar o PDF formatado com ReportLab no padrão brasileiro
   def gerar_pdf_orcamento():
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -365,11 +384,13 @@ with aba_orcamento:
 
     y_pos -= 40
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(40, y_pos, f"Preço Unitário: R$ {preco_unitario:.2f}")
+    c.drawString(
+        40, y_pos, f"Preço Unitário: {formata_real(preco_unitario)}"
+    )
     c.setFont("Helvetica-Bold", 16)
     c.setFillColorRGB(0.15, 0.5, 0.2)
     c.drawString(
-        40, y_pos - 30, f"VALOR TOTAL: R$ {valor_total:.2f}"
+        40, y_pos - 30, f"VALOR TOTAL: {formata_real(valor_total)}"
     )
 
     # Rodapé
@@ -388,6 +409,7 @@ with aba_orcamento:
     buffer.seek(0)
     return buffer
 
+
   # Botões de Ação lado a lado
   col_btn1, col_btn2 = st.columns(2)
 
@@ -404,9 +426,9 @@ with aba_orcamento:
           f" cotação:\n\n• *Tecido:* {tecido_escolhido}\n• *Quantidade Total:*"
           f" {quantidade_total} peças\n• *Distribuição de"
           f" Tamanhos:*\n{detalhe_wpp}\n\n• *Condição:* {condicao_pagamento}\n•"
-          f" *Valor Unitário:* R$ {preco_unitario:.2f}\n• *Valor Total:* *R$"
-          f" {valor_total:.2f}*\n\nFicamos à disposição! Conheça nosso"
-          " trabalho no Instagram:"
+          f" *Valor Unitário:* {formata_real(preco_unitario)}\n• *Valor Total:*"
+          f" *{formata_real(valor_total)}*\n\nFicamos à disposição! Conheça"
+          " nosso trabalho no Instagram:"
           " https://www.instagram.com/benelliconfeccoes/\nEntre em contato pelo"
           " telefone (35) 98846-6651."
       )
