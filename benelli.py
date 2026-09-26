@@ -9,7 +9,8 @@ st.set_page_config(
 )
 
 # Estilo visual personalizado (CSS)
-st.markdown("""
+st.markdown(
+    """
     <style>
         .main { background-color: #f8f9fa; }
         .stTabs [data-baseweb="tab-list"] { gap: 10px; }
@@ -36,7 +37,9 @@ st.markdown("""
             background-color: #219653;
         }
     </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Dados de Preços baseados na tabela oficial da Benelli (20/04/2026)
 TABELA_TECIDOS = {
@@ -57,96 +60,131 @@ TABELA_TECIDOS = {
 # Cabeçalho Principal
 st.title("👕 Benelli Confecções")
 st.markdown("##### *Sistema Profissional de Orçamentos e Consulta de Medidas*")
-st.info("📞 **Contacto direto:** (35) 98846-6651 | *Confeccionamos peças sob medida, consulte-nos.*[cite: 11, 13]")
+st.info(
+    "📞 **Contato direto:** (35) 98846-6651 | *Confeccionamos peças sob medida,"
+    " consulte-nos.*[cite: 11, 13]"
+)
 
 st.divider()
 
-# Função para exibir PDF embutido na página
-def exibir_pdf(ficheiro_pdf):
-    try:
-        with open(ficheiro_pdf, "rb") as f:
-            base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600px" type="application/pdf"></iframe>'
-        st.markdown(pdf_display, unsafe_allow_html=True)
-    except FileNotFoundError:
-        st.error(f"Ficheiro {ficheiro_pdf} não encontrado no repositório. Verifique se o nome está exato.")
 
-# Abas Principais
-aba_cliente, aba_orcamento = st.tabs(["👀 Catálogo e Medidas para o Cliente", "🧮 Gerador de Orçamentos"])
+# Função para exibir PDF de forma compatível com os navegadores
+def exibir_pdf(arquivo_pdf):
+  try:
+    with open(arquivo_pdf, "rb") as f:
+      bytes_pdf = f.read()
+      base64_pdf = base64.b64encode(bytes_pdf).decode("utf-8")
 
-with aba_cliente:
-    st.header("Guia Visual de Tamanhos e Medidas")
-    st.write("Selecione a categoria abaixo para visualizar o esquema oficial de tamanhos:")
+    # Exibição via tag object (melhor compatibilidade)
+    pdf_display = f'<object data="data:application/pdf;base64,{base64_pdf}" type="application/pdf" width="100%" height="600px"><p>Seu navegador não suporta a exibição direta de PDF.</p></object>'
+    st.markdown(pdf_display, unsafe_allow_html=True)
 
-    escolha_tabela = st.selectbox(
-        "Escolha a categoria de vestuário:",
-        ["Camisetas Adultas", "Tamanhos Infantis", "Tamanhos Baby Look"]
+    # Botão de download direto logo abaixo
+    st.download_button(
+        label=f"📥 Baixar o arquivo {arquivo_pdf}",
+        data=bytes_pdf,
+        file_name=arquivo_pdf,
+        mime="application/pdf",
+    )
+  except FileNotFoundError:
+    st.error(
+        f"Arquivo {arquivo_pdf} não encontrado no repositório. Verifique se o"
+        " nome está exato."
     )
 
-    st.markdown("---")
 
-    if escolha_tabela == "Camisetas Adultas":
-        st.subheader("👕 Tabela de Camisetas Adultas")
-        st.markdown("Consulte abaixo o documento oficial com as medidas detalhadas (PP ao XGG)[cite: 7]:")
-        exibir_pdf("Tamanhos Camisetas-1.pdf")
+# Abas Principais
+aba_cliente, aba_orcamento = st.tabs(
+    ["👀 Catálogo e Medidas para o Cliente", "🧮 Gerador de Orçamentos"]
+)
 
-    elif escolha_tabela == "Tamanhos Infantis":
-        st.subheader("🧒 Tabela de Tamanhos Infantis")
-        st.markdown("Consulte abaixo o documento oficial com as medidas infantis (Tamanho 1 ao 14)[cite: 8]:")
-        exibir_pdf("Tamanhos infantis.pdf")
+with aba_cliente:
+  st.header("Guia Visual de Tamanhos e Medidas")
+  st.write(
+      "Selecione a categoria abaixo para visualizar o esquema oficial de"
+      " tamanhos:"
+  )
 
-    elif escolha_tabela == "Tamanhos Baby Look":
-        st.subheader("👚 Tabela de Baby Look")
-        st.markdown("Consulte abaixo o documento oficial com as medidas de Baby Look (P ao XG)[cite: 13]:")
-        exibir_pdf("Tamnhos babylook.pdf")
+  escolha_tabela = st.selectbox(
+      "Escolha a categoria de vestuário:",
+      ["Camisetas Adultas", "Tamanhos Infantis", "Tamanhos Baby Look"],
+  )
+
+  st.markdown("---")
+
+  if escolha_tabela == "Camisetas Adultas":
+    st.subheader("👕 Tabela de Camisetas Adultas")
+    st.markdown(
+        "Consulte abaixo o documento oficial com as medidas detalhadas (PP ao"
+        f" XGG)[cite: 7]:"
+    )
+    exibir_pdf("Tamanhos Camisetas-1.pdf")
+
+  elif escolha_tabela == "Tamanhos Infantis":
+    st.subheader("🧒 Tabela de Tamanhos Infantis")
+    st.markdown(
+        "Consulte abaixo o documento oficial com as medidas infantis (Tamanho"
+        f" 1 ao 14)[cite: 8]:"
+    )
+    exibir_pdf("Tamanhos infantis.pdf")
+
+  elif escolha_tabela == "Tamanhos Baby Look":
+    st.subheader("👚 Tabela de Baby Look")
+    st.markdown(
+        "Consulte abaixo o documento oficial com as medidas de Baby Look (P ao"
+        f" XG)[cite: 13]:"
+    )
+    exibir_pdf("Tamnhos babylook.pdf")
 
 with aba_orcamento:
-    st.header("Gerador de Orçamentos e Cotações")
-    
-    col_a, col_b = st.columns(2)
-    
-    with col_a:
-        cliente_nome = st.text_input("Nome do Cliente / Empresa:")
-        tecido_escolhido = st.selectbox("Escolha o Tecido / Composição:", list(TABELA_TECIDOS.keys()))
-    
-    with col_b:
-        condicao_pagamento = st.radio("Condição de Pagamento:", ["À Vista", "A Prazo"])
-        quantidade = st.number_input("Quantidade de Peças:", min_value=1, value=10, step=1)
+  st.header("Gerador de Orçamentos e Cotações")
 
-    # Cálculo financeiro
-    if condicao_pagamento == "À Vista":
-        preco_unitario = TABELA_TECIDOS[tecido_escolhido]["avista"]
-    else:
-        preco_unitario = TABELA_TECIDOS[tecido_escolhido]["prazo"]
+  col_a, col_b = st.columns(2)
 
-    valor_total = preco_unitario * quantidade
+  with col_a:
+    cliente_nome = st.text_input("Nome do Cliente / Empresa:")
+    tecido_escolhido = st.selectbox(
+        "Escolha o Tecido / Composição:", list(TABELA_TECIDOS.keys())
+    )
 
-    st.divider()
-    
-    # Cartão de Resumo em destaque
-    st.subheader("Resumo da Cotação")
-    
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Preço Unitário", f"R$ {preco_unitario:.2f}")
-    m2.metric("Quantidade", f"{quantidade} un.")
-    m3.metric("Valor Total", f"R$ {valor_total:.2f}")
+  with col_b:
+    condicao_pagamento = st.radio("Condição de Pagamento:", ["À Vista", "A Prazo"])
+    quantidade = st.number_input(
+        "Quantidade de Peças:", min_value=1, value=10, step=1
+    )
 
-    st.write(f"**Cliente:** {cliente_nome if cliente_nome else 'Cliente Geral'}")
-    st.write(f"**Tecido Selecionado:** {tecido_escolhido}")
-    st.write(f"**Condição:** {condicao_pagamento}")
+  # Cálculo financeiro
+  if condicao_pagamento == "À Vista":
+    preco_unitario = TABELA_TECIDOS[tecido_escolhido]["avista"]
+  else:
+    preco_unitario = TABELA_TECIDOS[tecido_escolhido]["prazo"]
 
-    st.markdown("---")
+  valor_total = preco_unitario * quantidade
 
-    if st.button("Gerar Texto Formatado para WhatsApp"):
-        texto_wpp = (
-            f"*ORÇAMENTO - BENELLI CONFECÇÕES*\n"
-            f"Olá *{cliente_nome if cliente_nome else 'Cliente'}*, segue a sua cotação:\n\n"
-            f"• *Tecido:* {tecido_escolhido}\n"
-            f"• *Quantidade:* {quantidade} peças\n"
-            f"• *Condição:* {condicao_pagamento}\n"
-            f"• *Valor Unitário:* R$ {preco_unitario:.2f}\n"
-            f"• *Valor Total:* *R$ {valor_total:.2f}*\n\n"
-            f"Ficamos à disposição! Entre em contacto pelo telefone (35) 98846-6651[cite: 11, 13]."
-        )
-        st.success("Texto gerado com sucesso! Copie abaixo:")
-        st.text_area("Mensagem pronta para envio:", texto_wpp, height=160)
+  st.divider()
+
+  # Cartão de Resumo em destaque
+  st.subheader("Resumo da Cotação")
+
+  m1, m2, m3 = st.columns(3)
+  m1.metric("Preço Unitário", f"R$ {preco_unitario:.2f}")
+  m2.metric("Quantidade", f"{quantidade} un.")
+  m3.metric("Valor Total", f"R$ {valor_total:.2f}")
+
+  st.write(f"**Cliente:** {cliente_nome if cliente_nome else 'Cliente Geral'}")
+  st.write(f"**Tecido Selecionado:** {tecido_escolhido}")
+  st.write(f"**Condição:** {condicao_pagamento}")
+
+  st.markdown("---")
+
+  if st.button("Gerar Texto Formatado para WhatsApp"):
+    texto_wpp = (
+        f"*ORÇAMENTO - BENELLI CONFECÇÕES*\n"
+        f"Olá *{cliente_nome if cliente_nome else 'Cliente'}*, segue a sua"
+        f" cotação:\n\n• *Tecido:* {tecido_escolhido}\n• *Quantidade:* {quantidade}"
+        f" peças\n• *Condição:* {condicao_pagamento}\n• *Valor Unitário:* R$"
+        f" {preco_unitario:.2f}\n• *Valor Total:* *R$ {valor_total:.2f}*\n\nFicamos"
+        " à disposição! Entre em contato pelo telefone (35) 98846-6651[cite: 11]."
+    )
+    st.success("Texto gerado com sucesso! Copie abaixo:")
+    st.text_area("Mensagem pronta para envio:", texto_wpp, height=160)
