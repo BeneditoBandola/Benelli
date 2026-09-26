@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from io import BytesIO
 import streamlit as st
 from reportlab.lib.pagesizes import A4
@@ -24,7 +25,7 @@ st.markdown(
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .stTabs [aria-selected="true"] {
-            background-color: #2c3e50 !important;
+            background-color: #0099cc !important;
             color: white !important;
         }
         div.stButton > button:first-child {
@@ -332,77 +333,125 @@ with aba_orcamento:
   st.markdown("---")
 
 
-  # Função para gerar o PDF formatado com ReportLab no padrão brasileiro
+  # Função para gerar o PDF refinado com as cores do logo e validade de 1 semana
   def gerar_pdf_orcamento():
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     largura, altura = A4
 
-    # Cabeçalho do PDF
-    c.setFillColorRGB(0.1, 0.2, 0.3)
-    c.rect(0, altura - 80, largura, 80, fill=1, stroke=0)
+    # Cores inspiradas na identidade visual da Benelli
+    # Azul principal do logo nos elementos de destaque do cabeçalho
+    cor_azul = (0.0, 0.6, 0.8)
+    cor_cinza_fundo = (0.95, 0.95, 0.95)
 
-    c.setFillColorRGB(1, 1, 1)
-    c.setFont("Helvetica-Bold", 20)
-    c.drawString(40, altura - 45, "BENELLI CONFECÇÕES")
-    c.setFont("Helvetica", 12)
+    # Fundo leve do topo
+    c.setFillColorRGB(*cor_cinza_fundo)
+    c.rect(0, altura - 110, largura, 110, fill=1, stroke=0)
+
+    # Barra superior com o azul do logo
+    c.setFillColorRGB(*cor_azul)
+    c.rect(0, altura - 15, largura, 15, fill=1, stroke=0)
+
+    # Títulos e textos do Cabeçalho (Textos em preto conforme solicitado)
+    c.setFillColorRGB(0, 0, 0)
+    c.setFont("Helvetica-Bold", 22)
+    c.drawString(40, altura - 55, "BENELLI CONFECÇÕES")
+
+    c.setFont("Helvetica", 10)
+    c.drawString(40, altura - 75, "Tradição e Qualidade Desde 2007")
+    c.drawString(40, altura - 92, "Contato: (35) 98846-6651")
+
+    # Datas (Emissão e Validade de 1 semana)
+    data_emissao = datetime.now()
+    data_validade = data_emissao + timedelta(days=7)
+
+    c.setFont("Helvetica-Bold", 10)
     c.drawString(
-        40, altura - 65, "Orçamento Oficial - Contato: (35) 98846-6651"
+        380,
+        altura - 60,
+        f"Data de Emissão: {data_emissao.strftime('%d/%m/%Y')}",
+    )
+    c.setFillColorRGB(0.7, 0.1, 0.1)  # Destaque leve na validade
+    c.drawString(
+        380,
+        altura - 78,
+        f"Válido até: {data_validade.strftime('%d/%m/%Y')} (1 semana)",
     )
 
-    # Dados do Cliente
+    # Linha divisória
+    c.setStrokeColorRGB(0.8, 0.8, 0.8)
+    c.setLineWidth(1)
+    c.line(40, altura - 125, largura - 40, altura - 125)
+
+    # Informações do Cliente e Pedido
     c.setFillColorRGB(0, 0, 0)
-    c.setFont("Helvetica-Bold", 14)
+    c.setFont("Helvetica-Bold", 13)
     c.drawString(
         40,
-        altura - 120,
+        altura - 155,
         f"Cliente: {cliente_nome if cliente_nome else 'Cliente Geral'}",
     )
+
     c.setFont("Helvetica", 11)
     c.drawString(
-        40, altura - 145, f"Tecido / Composição: {tecido_escolhido}"
+        40, altura - 180, f"Tecido / Composição: {tecido_escolhido}"
     )
-    c.drawString(40, altura - 165, f"Condição de Pagamento: {condicao_pagamento}")
     c.drawString(
-        40, altura - 185, f"Quantidade Total: {quantidade_total} peças"
+        40, altura - 200, f"Condição de Pagamento: {condicao_pagamento}"
+    )
+    c.drawString(
+        40, altura - 220, f"Quantidade Total: {quantidade_total} peças"
     )
 
-    # Detalhe dos Tamanhos
+    # Tabela de Distribuição por Tamanho
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(40, altura - 220, "Distribuição por Tamanho:")
-    c.setFont("Helvetica", 11)
-    y_pos = altura - 245
+    c.drawString(40, altura - 260, "Detalhamento da Grade de Tamanhos:")
+
+    y_pos = altura - 285
+    c.setFont("Helvetica", 10)
+
+    # Cabeçalho da mini-tabela de tamanhos
+    c.setFillColorRGB(*cor_cinza_fundo)
+    c.rect(40, y_pos - 3, 515, 18, fill=1, stroke=0)
+    c.setFillColorRGB(0, 0, 0)
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(50, y_pos + 2, "Tamanho")
+    c.drawString(200, y_pos + 2, "Quantidade")
+
+    y_pos -= 25
+    c.setFont("Helvetica", 10)
     for tam, qtd in quantidades_tamanhos.items():
       if qtd > 0:
-        c.drawString(60, y_pos, f"• Tamanho {tam}: {qtd} unidade(s)")
+        c.drawString(50, y_pos, f"Tamanho {tam}")
+        c.drawString(200, y_pos, f"{qtd} unidade(s)")
         y_pos -= 20
 
-    # Valores Finais
+    # Resumo de Valores
     y_pos -= 20
-    c.setStrokeColorRGB(0.7, 0.7, 0.7)
+    c.setStrokeColorRGB(0.8, 0.8, 0.8)
     c.line(40, y_pos, largura - 40, y_pos)
 
-    y_pos -= 40
-    c.setFont("Helvetica-Bold", 12)
+    y_pos -= 35
+    c.setFont("Helvetica-Bold", 11)
     c.drawString(
         40, y_pos, f"Preço Unitário: {formata_real(preco_unitario)}"
     )
-    c.setFont("Helvetica-Bold", 16)
-    c.setFillColorRGB(0.15, 0.5, 0.2)
-    c.drawString(
-        40, y_pos - 30, f"VALOR TOTAL: {formata_real(valor_total)}"
-    )
 
-    # Rodapé
-    c.setFillColorRGB(0.4, 0.4, 0.4)
+    y_pos -= 30
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(40, y_pos, f"VALOR TOTAL: {formata_real(valor_total)}")
+
+    # Rodapé Institucional
+    c.setFillColorRGB(0.3, 0.3, 0.3)
     c.setFont("Helvetica", 9)
     c.drawString(
         40,
-        50,
-        "Visite nosso Instagram: https://www.instagram.com/benelliconfeccoes/",
+        55,
+        "Agradecemos a preferência! Conheça mais do nosso trabalho no Instagram:",
     )
+    c.drawString(40, 42, "https://www.instagram.com/benelliconfeccoes/")
     c.drawString(
-        40, 35, "Benelli Confecções - Confeccionamos peças sob medida."
+        40, 25, "Benelli Confecções - Peças confeccionadas com excelência."
     )
 
     c.save()
@@ -427,10 +476,10 @@ with aba_orcamento:
           f" {quantidade_total} peças\n• *Distribuição de"
           f" Tamanhos:*\n{detalhe_wpp}\n\n• *Condição:* {condicao_pagamento}\n•"
           f" *Valor Unitário:* {formata_real(preco_unitario)}\n• *Valor Total:*"
-          f" *{formata_real(valor_total)}*\n\nFicamos à disposição! Conheça"
-          " nosso trabalho no Instagram:"
-          " https://www.instagram.com/benelliconfeccoes/\nEntre em contato pelo"
-          " telefone (35) 98846-6651."
+          f" *{formata_real(valor_total)}*\n\n*(Orçamento válido por 1"
+          " semana)*\n\nFicamos à disposição! Conheça nosso trabalho no"
+          " Instagram: https://www.instagram.com/benelliconfeccoes/\nEntre em"
+          " contato pelo telefone (35) 98846-6651."
       )
       st.success("Texto gerado com sucesso!")
       st.text_area("Mensagem pronta para envio:", texto_wpp, height=180)
