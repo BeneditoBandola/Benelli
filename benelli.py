@@ -3,8 +3,27 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Benelli Confecções - Sistema de Orçamentos",
-    layout="wide",
+    layout="centered",  # Ideal para visualização mobile e desktop
 )
+
+# --- CABEÇALHO COM LOGOTIPO ---
+col_logo1, col_logo2, col_logo3 = st.columns([1, 2, 1])
+with col_logo2:
+  try:
+    # Certifique-se de enviar a imagem 'logo_benelli.png' para o repositório do GitHub
+    st.image("logo_benelli.png", use_container_width=True)
+  except Exception:
+    st.markdown(
+        "<h2 style='text-align: center;'>Benelli Confecções</h2>",
+        unsafe_allow_html=True,
+    )
+
+st.markdown(
+    "<h4 style='text-align: center; color: #555;'>Sistema Integrado de"
+    " Orçamentos</h4>",
+    unsafe_allow_html=True,
+)
+st.markdown("---")
 
 # TABELA OFICIAL DE TECIDOS (MARCELO)
 TABELA_TECIDOS = {
@@ -268,74 +287,74 @@ TABELA_TECIDOS = {
     },
 }
 
-st.title("Benelli Confecções - Sistema Integrado de Orçamentos")
+st.subheader("📋 Parâmetros do Pedido")
 
-# Layout em Colunas
-col1, col2 = st.columns([1, 1])
+tecido_nome = st.selectbox(
+    "Escolha o Tecido / Cor:", list(TABELA_TECIDOS.keys())
+)
+cond = st.radio("Condição de Pagamento:", ["À Vista", "A Prazo"], horizontal=True)
+cond_key = "avista" if cond == "À Vista" else "aprazo"
 
-with col1:
-  st.subheader("Parâmetros do Pedido")
+st.markdown("**Quantidades por Tamanho:**")
+c1, c2, c3, c4 = st.columns(4)
+with c1:
+  pp = st.number_input("PP", min_value=0, value=0, step=1)
+  p = st.number_input("P", min_value=0, value=0, step=1)
+with c2:
+  m = st.number_input("M", min_value=0, value=0, step=1)
+  g = st.number_input("G", min_value=0, value=0, step=1)
+with c3:
+  gg = st.number_input("GG", min_value=0, value=0, step=1)
+  xg = st.number_input("XG", min_value=0, value=0, step=1)
+with c4:
+  xgg = st.number_input("XGG", min_value=0, value=0, step=1)
 
-  tecido_nome = st.selectbox(
-      "Escolha o Tecido / Cor:", list(TABELA_TECIDOS.keys())
+d = {"PP": pp, "P": p, "M": m, "G": g, "GG": gg, "XG": xg, "XGG": xgg}
+total_pecas = sum(d.values())
+
+modelo_escolhido = st.selectbox(
+    "Modelo (Custo Costura + Aviamentos):",
+    [
+        "Camiseta (R$ 5,00)",
+        "Camisa Polo (R$ 8,00)",
+        "Moletom Fechado (R$ 10,00)",
+        "Moletom Aberto/Jaqueta c/ Zíper (R$ 21,00)",
+    ],
+)
+
+est_escolhida = st.radio(
+    "Modalidade de Estampa:",
+    ["Nenhuma", "Silk Screen", "Digital", "DTF"],
+    horizontal=True,
+)
+
+n_cores = 1
+tipo_dig = "Localizada (Simples)"
+larg, alt = 20.0, 25.0
+
+if est_escolhida == "Silk Screen":
+  n_cores = st.number_input(
+      "Número de Cores (Silk):", min_value=1, value=1, step=1
   )
-  cond = st.radio("Condição de Pagamento:", ["À Vista", "A Prazo"], horizontal=True)
-  cond_key = "avista" if cond == "À Vista" else "aprazo"
-
-  st.text("Quantidades por Tamanho:")
-  c_t1, c_t2, c_t3, c_t4 = st.columns(4)
-  with c_t1:
-    pp = st.number_input("PP", min_value=0, value=0, step=1)
-    p = st.number_input("P", min_value=0, value=0, step=1)
-  with c_t2:
-    m = st.number_input("M", min_value=0, value=0, step=1)
-    g = st.number_input("G", min_value=0, value=0, step=1)
-  with c_t3:
-    gg = st.number_input("GG", min_value=0, value=0, step=1)
-    xg = st.number_input("XG", min_value=0, value=0, step=1)
-  with c_t4:
-    xgg = st.number_input("XGG", min_value=0, value=0, step=1)
-
-  d = {"PP": pp, "P": p, "M": m, "G": g, "GG": gg, "XG": xg, "XGG": xgg}
-  total_pecas = sum(d.values())
-
-  modelo_escolhido = st.selectbox(
-      "Modelo (Custo Costura + Aviamentos):",
-      [
-          "Camiseta (R$ 5,00)",
-          "Camisa Polo (R$ 8,00)",
-          "Moletom Fechado (R$ 10,00)",
-          "Moletom Aberto/Jaqueta c/ Zíper (R$ 21,00)",
-      ],
+elif est_escolhida == "Digital":
+  tipo_dig = st.selectbox(
+      "Tipo Digital:",
+      ["Localizada (Simples)", "Localizada (Frente e Costas)", "Total"],
   )
+elif est_escolhida == "DTF":
+  col_l, col_a = st.columns(2)
+  with col_l:
+    larg = st.number_input("Largura da Arte (cm):", min_value=1.0, value=20.0)
+  with col_a:
+    alt = st.number_input("Altura da Arte (cm):", min_value=1.0, value=25.0)
 
-  est_escolhida = st.radio(
-      "Modalidade de Estampa:", ["Nenhuma", "Silk Screen", "Digital", "DTF"], horizontal=True
-  )
+custo_extra = st.number_input(
+    "Frete / Custos Extras (Total R$):", min_value=0.0, value=0.0, step=5.0
+)
 
-  n_cores = 1
-  tipo_dig = "Localizada (Simples)"
-  larg, alt = 20.0, 25.0
+st.markdown("---")
 
-  if est_escolhida == "Silk Screen":
-    n_cores = st.number_input("Número de Cores (Silk):", min_value=1, value=1, step=1)
-  elif est_escolhida == "Digital":
-    tipo_dig = st.selectbox(
-        "Tipo Digital:",
-        ["Localizada (Simples)", "Localizada (Frente e Costas)", "Total"],
-    )
-  elif est_escolhida == "DTF":
-    c_l, c_a = st.columns(2)
-    with c_l:
-      larg = st.number_input("Largura da Arte (cm):", min_value=1.0, value=20.0)
-    with c_a:
-      alt = st.number_input("Altura da Arte (cm):", min_value=1.0, value=25.0)
-
-  custo_extra = st.number_input(
-      "Frete / Custos Extras (Total R$):", min_value=0.0, value=0.0, step=5.0
-  )
-
-# Lógica de Cálculo
+# --- PROCESSAMENTO DOS CÁLCULOS ---
 dados_tec = TABELA_TECIDOS[tecido_nome]
 preco_kg = dados_tec[cond_key]
 tipo_tec = dados_tec["tipo"]
@@ -422,10 +441,9 @@ if total_pecas > 0:
 
   grade_str = ", ".join([f"{t}: {v}" for t, v in d.items() if v > 0])
 
-  with col2:
-    st.subheader("Resultados e Textos de Saída")
+  st.subheader("📊 Resultados e Textos de Saída")
 
-    texto_m = f"""=== PROVA REAL (PARA O MARCELO) ===
+  texto_m = f"""=== PROVA REAL (PARA O MARCELO) ===
 Quantidade: {total_pecas} peça(s) [{grade_str}]
 Modelo / Costura: {modelo_escolhido} (R$ {custo_unit_costura:.2f}/pç)
 - Custo Costura + Aviamentos: R$ {custo_costura_total:.2f}
@@ -444,16 +462,18 @@ CUSTO GERAL DE PRODUÇÃO: R$ {custo_geral_total:.2f}
 Custo Real Unitário: R$ {custo_unitario_final:.2f} / peça
 {alerta_msg}
 """
-    st.text_area("Texto para o Marcelo (Prova Real)", texto_m, height=280)
+  st.text_area("Texto para o Marcelo (Prova Real)", texto_m, height=280)
 
-    texto_c = f"""=== ORÇAMENTO COMERCIAL ===
+  texto_c = f"""=== ORÇAMENTO COMERCIAL ===
 Quantidade: {total_pecas} peça(s)
 Item: {modelo_escolhido.split('(')[0].strip()} em {tecido_nome} com {est_escolhida.lower()}
 
 VALOR TOTAL DO PEDIDO: R$ {custo_geral_total:.2f}
 VALOR POR UNIDADE: R$ {custo_unitario_final:.2f} cada
 """
-    st.text_area("Texto para o Cliente (Apenas Valores)", texto_c, height=180)
+  st.text_area("Texto para o Cliente (Apenas Valores)", texto_c, height=180)
 else:
-  with col2:
-    st.info("Preencha a grade de tamanhos na coluna ao lado para calcular.")
+  st.info(
+      "👆 Preencha as quantidades na grade de tamanhos acima para gerar os"
+      " orçamentos."
+  )
