@@ -353,9 +353,9 @@ custo_extra = st.number_input(
 
 # Seletor de Margem de Lucro para o Cliente (25% a 70% de 5 em 5)
 margem_lucro = st.selectbox(
-    "Margem de Lucro para o Cliente (%):",
+    "Margem de Lucro (%):",
     options=list(range(25, 71, 5)),
-    index=5,  # Padrão em 50% (índice 5)
+    index=5,  # Padrão em 50%
 )
 
 st.markdown("---")
@@ -440,13 +440,13 @@ if total_pecas > 0:
         " folha(s) de 50x50cm"
     )
 
-  # Custo de Produção Total e Unitário (Puro, sem margem - para o Marcelo)
+  # Custo de Produção Total e Unitário (Puro)
   custo_geral_total = (
       custo_tecido_total + custo_costura_total + custo_estampa_total + custo_extra
   )
   custo_unitario_final = custo_geral_total / total_pecas
 
-  # Valor de Venda com Margem de Lucro (Aplicado para o Cliente)
+  # Valor de Venda com Margem de Lucro Aplicada
   fator_lucro = 1 + (margem_lucro / 100.0)
   venda_geral_total = custo_geral_total * fator_lucro
   venda_unitario_final = custo_unitario_final * fator_lucro
@@ -455,7 +455,7 @@ if total_pecas > 0:
 
   st.subheader("📊 Resultados e Textos de Saída")
 
-  # Texto do Marcelo (Custo puro de produção)
+  # Texto do Marcelo (Com Custo Puro + Indicação da Margem Aplicada)
   texto_m = f"""=== PROVA REAL (PARA O MARCELO) ===
 Quantidade: {total_pecas} peça(s) [{grade_str}]
 Modelo / Costura: {modelo_escolhido} (R$ {custo_unit_costura:.2f}/pç)
@@ -473,9 +473,11 @@ Frete / Custos Extras: R$ {custo_extra:.2f}
 ---------------------------------------------
 CUSTO GERAL DE PRODUÇÃO: R$ {custo_geral_total:.2f}
 Custo Real Unitário: R$ {custo_unitario_final:.2f} / peça
+Margem de Lucro Aplicada: {margem_lucro}%
+Valor de Venda Final (Cliente): R$ {venda_unitario_final:.2f} / peça
 {alerta_msg}
 """
-  st.text_area("Texto para o Marcelo (Prova Real - Custo)", texto_m, height=280)
+  st.text_area("Texto para o Marcelo (Prova Real)", texto_m, height=310)
 
   # Texto do Cliente (Com a margem de lucro aplicada)
   texto_c = f"""=== ORÇAMENTO COMERCIAL ===
